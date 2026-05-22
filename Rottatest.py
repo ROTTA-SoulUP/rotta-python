@@ -75,16 +75,6 @@ def cadastrar_usuario():
     print(f"\nUsuário {nome} cadastrado com sucesso!")
 
 
-def listar_usuarios():
-    print("\n----- LISTA DE USUÁRIOS -----")
-
-    if not usuarios:
-        print("Nenhum usuário cadastrado.")
-        return
-
-    for i, usuario in enumerate(usuarios, start=1):
-        print(f"{i}. {usuario['nome']} - {usuario['email']}")
-
 
 def validar_atividade():
     global saldo_pontos
@@ -130,13 +120,6 @@ def converter_pontos():
     print(f"Saldo restante: {saldo_pontos} pontos.")
 
 
-def ranking():
-    print("\n----- RANKING -----")
-    print("1º Rotta - 1250 pontos")
-    print("2º Rank up - 980 pontos")
-    print(f"3º Você - {saldo_pontos} pontos")
-
-
 def chatbot():
     print("\n----- Rottinha CHATBOT -----")
 
@@ -148,7 +131,7 @@ def chatbot():
         print("Nenhuma pergunta informada.")
 
 
-def excluir_usuario():
+def desativar_conta():
     print("\n----- EXCLUIR USUÁRIO -----")
 
     email = input("Digite o e-mail do usuário: ").strip()
@@ -157,11 +140,10 @@ def excluir_usuario():
         if usuario["email"] == email:
             usuarios.remove(usuario)
             salvar_usuarios()
-            print("Usuário removido com sucesso.")
+            print("Conta excluida com sucesso.")
             return
 
-    print("Usuário não encontrado.")
-
+    print("Email não encontrado.")
 
 def gerar_qrcode():
     global saldo_pontos
@@ -179,16 +161,16 @@ def gerar_qrcode():
 
     qr_code = """
 █████████████████████████
-██ ▄▄▄▄▄ ██▀▄█ ▄▄▄▄▄ ██
-██ █   █ █ ▀ █ █   █ ██
-██ █▄▄▄█ █▄▀▄█ █▄▄▄█ ██
-██▄▄▄▄▄▄▄█▄█▄█▄▄▄▄▄▄▄██
-██ ▄▀▄ ▄▀█ ▄█ ▄ ▄▀█▄ ██
-██▄█▀▄▄▄█▄▀▀▀▄█▄▄▀██▄██
-██ ▄▄▄▄▄ █▄ ▄ ▄█▀▄▀▄██
-██ █   █ █▀█▄▄▀▀▄▀█▄██
-██ █▄▄▄█ █ ▄▀█▄▀▀█▄██
-██▄▄▄▄▄▄▄█▄▄▄██▄█▄▄▄██
+██ ▄▄▄▄▄ ██▀▄█ ▄▄▄▄▄ ████
+██ █   █ █ ▀ █ █   █ ████
+██ █▄▄▄█ █▄▀▄█ █▄▄▄█ ████
+██▄▄▄▄▄▄▄█▄█▄█▄▄▄▄▄▄▄████
+██ ▄▀▄ ▄▀█ ▄█ ▄ ▄▀█▄ ████
+██▄█▀▄▄▄█▄▀▀▀▄█▄▄▀██▄████
+██ ▄▄▄▄▄ █▄ ▄ ▄█▀▄▀▄█████
+██ █   █ █▀█▄▄▀▀▄▀█▄█████
+██ █▄▄▄█ █ ▄▀█▄▀▀█▄█ ████
+██▄▄▄▄▄▄▄█▄▄▄██▄█▄▄▄█████
 █████████████████████████
 """
 
@@ -205,14 +187,12 @@ def menu():
         print("           ROTTA")
         print("-" * 30)
         print("1 - Cadastrar usuário")
-        print("2 - Listar usuários")
-        print("3 - Validar atividade")
-        print("4 - Visualizar pontos")
-        print("5 - Converter pontos")
-        print("6 - Ranking")
-        print("7 - Chatbot")
-        print("8 - Excluir usuário")
-        print("9 - Gerar QR Code")
+        print("2 - Validar atividade")
+        print("3 - Visualizar pontos")
+        print("4 - Converter pontos")
+        print("5 - Chatbot")
+        print("6 - Excluir usuário")
+        print("7 - Gerar QR Code")
         print("0 - Sair")
         print("-" * 30)
 
@@ -224,27 +204,21 @@ def menu():
                 cadastrar_usuario()
 
             case "2":
-                listar_usuarios()
-
-            case "3":
                 validar_atividade()
 
-            case "4":
+            case "3":
                 visualizar_pontos()
 
-            case "5":
+            case "4":
                 converter_pontos()
 
-            case "6":
-                ranking()
-
-            case "7":
+            case "5":
                 chatbot()
 
-            case "8":
-                excluir_usuario()
+            case "6":
+                desativar_conta()
 
-            case "9":
+            case "7":
                 gerar_qrcode()
 
             case "0":
