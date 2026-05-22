@@ -1,5 +1,6 @@
 import json
 import os
+import time
 
 ARQUIVO_USUARIOS = "usuarios.json"
 ARQUIVO_PONTOS = "pontos.json"
@@ -87,14 +88,15 @@ def validar_atividade():
         print("Comprovante inválido.")
         return
 
-    print("IA analisando comprovante...")
-    print("Comprovante aprovado!")
+    print("IA analisando comprovante...\n")
+    time.sleep(2)
+    print("Comprovante aprovado!\n")
 
     saldo_pontos += 50
 
     salvar_pontos()
-
-    print("Você ganhou 50 pontos!")
+    time.sleep(1.5)
+    print("Você ganhou 50 pontos!\n")
     print(f"Saldo atual: {saldo_pontos} pontos.")
 
 
