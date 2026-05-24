@@ -13,5 +13,10 @@
         "nome": "thiago",
         "email": "thiago@gmail.com",
         "senha": "18181"
+    },
+    {
+        "nome": "macaco bola",
+        "email": "novaraca@gmail.com",
+        "senha": "macaquinho123"
     }
 ]

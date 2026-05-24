@@ -1,3 +1,4 @@
+
 import json
 import os
 import time
@@ -75,7 +76,21 @@ def cadastrar_usuario():
 
     print(f"\nUsuário {nome} cadastrado com sucesso!")
 
+    def login():
+        print ("\n----- LOGIN -----")
 
+    email = input("Digite seu e-mail: ").strip()
+    senha = input("Digite sua senha: ").strip()
+
+    for usuario in usuarios:
+        if usuario["email"] == email and usuario["senha"] == senha:
+            print(f"\nBem-vindo, {usuario['nome']}!")
+            time.sleep(1)
+            return True
+
+    print("\nE-mail ou senha incorretos.")
+    time.sleep(1.5)
+    return False
 
 def validar_atividade():
     global saldo_pontos
@@ -202,33 +217,73 @@ def menu():
         print("-" * 30)
 
         match opcao:
-            case "1":
-                cadastrar_usuario()
 
-            case "2":
+            case "1":
                 validar_atividade()
 
-            case "3":
+            case "2":
                 visualizar_pontos()
 
-            case "4":
+            case "3":
                 converter_pontos()
 
-            case "5":
+            case "4":
                 chatbot()
 
-            case "6":
+            case "5":
                 desativar_conta()
 
-            case "7":
+            case "6":
                 gerar_qrcode()
 
             case "0":
-                print("\nEncerrando sistema.")
+                print("\nEncerrando sistema...")
                 break
 
             case _:
                 print("Opção inválida.")
+def login():
+    print("\n----- LOGIN -----")
 
+    email = input("Digite seu e-mail: ").strip()
+    senha = input("Digite sua senha: ").strip()
 
-menu()
+    for usuario in usuarios:
+        if usuario["email"] == email and usuario["senha"] == senha:
+            print(f"\nBem-vindo, {usuario['nome']}!")
+            time.sleep(1)
+            return True
+
+    print("\nE-mail ou senha incorretos.")
+    time.sleep(1.5)
+    return False
+while True:
+
+    print("\n" + "-" * 30)
+    print("        LOGIN ROTTA")
+    print("-" * 30)
+    print("1 - Login")
+    print("2 - Cadastrar usuário")
+    print("0 - Sair")
+    print("-" * 30)
+
+    escolha = input("Escolha uma opção: ").strip()
+
+    match escolha:
+
+        case "1":
+
+            acesso = login()
+
+            if acesso:
+                menu()
+
+        case "2":
+            cadastrar_usuario()
+
+        case "0":
+            print("\nEncerrando sistema.")
+            break
+
+        case _:
+            print("Opção inválida.")
