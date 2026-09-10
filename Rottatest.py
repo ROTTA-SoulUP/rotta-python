@@ -76,15 +76,6 @@ def carregar_historico():
 
 
 def salvar_historico(historico):
-    """
-    Salva o histórico de eventos (lista de tuplas) no arquivo JSON.
-
-    Parâmetros:
-        historico (list[tuple]): lista de tuplas (data, tipo, pontos).
-
-    Retorno:
-        bool: True se salvou com sucesso, False caso contrário.
-    """
     try:
         with open(ARQUIVO_HISTORICO, "w", encoding="utf-8") as arquivo:
             json.dump([list(evento) for evento in historico], arquivo, ensure_ascii=False, indent=4)
@@ -96,17 +87,6 @@ def salvar_historico(historico):
 
 
 def registrar_evento(historico, tipo, pontos):
-    """
-    Registra um novo evento no histórico (função de armazenamento em sequência).
-
-    Parâmetros:
-        historico (list[tuple]): histórico atual carregado em memória.
-        tipo (str): tipo do evento (ex.: "atividade", "conversao", "qrcode").
-        pontos (int): quantidade de pontos envolvida no evento (positivo ou negativo).
-
-    Retorno:
-        list[tuple]: histórico atualizado, já persistido em disco.
-    """
     data_hora = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
     evento = (data_hora, tipo, pontos)
 
@@ -120,26 +100,11 @@ def registrar_evento(historico, tipo, pontos):
 
 
 def filtrar_historico_por_tipo(historico, tipo):
-    """
-    Filtra os eventos do histórico por tipo (função de filtragem sobre sequência).
-
-    Parâmetros:
-        historico (list[tuple]): histórico completo.
-        tipo (str): tipo de evento a ser filtrado (ex.: "atividade").
-
-    Retorno:
-        list[tuple]: subconjunto do histórico cujo tipo corresponde ao informado.
-    """
     return [evento for evento in historico if evento[1].lower() == tipo.lower()]
 
 
 def listar_historico(historico):
-    """
-    Exibe os eventos de um histórico (lista de tuplas) de forma legível.
 
-    Parâmetros:
-        historico (list[tuple]): eventos a serem exibidos.
-    """
     if not historico:
         print("Nenhum evento encontrado.")
         return
@@ -151,15 +116,6 @@ def listar_historico(historico):
 # VALIDACÃO DE DADOS
 
 def email_valido(email):
-    """
-    Valida um formato simples de e-mail.
-
-    Parâmetros:
-        email (str): e-mail a ser validado.
-
-    Retorno:
-        bool: True se o e-mail contém '@' e '.', com texto antes e depois, False caso contrário.
-    """
     if "@" not in email or "." not in email:
         return False
 
@@ -168,16 +124,6 @@ def email_valido(email):
 
 
 def buscar_usuario_por_email(usuarios, email):
-    """
-    Procura um usuário na lista pelo e-mail.
-
-    Parâmetros:
-        usuarios (list[dict]): lista de usuários.
-        email (str): e-mail a ser buscado.
-
-    Retorno:
-        dict | None: o usuário encontrado, ou None se não existir.
-    """
     for usuario in usuarios:
         if usuario["email"] == email:
             return usuario
@@ -185,50 +131,16 @@ def buscar_usuario_por_email(usuarios, email):
 
 
 def filtrar_usuarios_por_nome(usuarios, termo_busca):
-    """
-    Filtra usuários cujo nome contenha o termo de busca (função de filtragem
-    sobre sequência de dicionários), sem diferenciar maiúsculas/minúsculas.
-
-    Parâmetros:
-        usuarios (list[dict]): lista completa de usuários.
-        termo_busca (str): trecho do nome a ser procurado.
-
-    Retorno:
-        list[dict]: nova lista contendo apenas os usuários cujo nome
-                    contém o termo informado.
-    """
     termo_busca = termo_busca.strip().lower()
     return [usuario for usuario in usuarios if termo_busca in usuario["nome"].lower()]
 
 
 def ordenar_usuarios_por_nome(usuarios):
-    """
-    Organiza os usuários em ordem alfabética pelo nome (função de organização
-    de sequência), sem alterar a lista original.
-
-    Parâmetros:
-        usuarios (list[dict]): lista de usuários a ser ordenada.
-
-    Retorno:
-        list[dict]: nova lista de usuários ordenada por nome.
-    """
     return sorted(usuarios, key=lambda usuario: usuario["nome"].lower())
 
 # REGISTRO E EXPORTACÃO DAS CONSULTAS CRUD
 
 def registrar_consulta_crud(registro_crud, operacao, dados):
-    """
-    Registra, em memória, o resultado real de uma operação de CRUD executada
-    pelo usuário (Create, Read, Update ou Delete), para posterior exportação.
-
-    Parâmetros:
-        registro_crud (list[dict]): lista de consultas já registradas na sessão.
-        operacao (str): "create", "read", "update" ou "delete".
-        dados (dict): dados relevantes da operação (ex.: usuário afetado).
-
-    Retorno:
-        list[dict]: registro de consultas atualizado.
-    """
     consulta = {
         "operacao": operacao,
         "data_hora": datetime.now().strftime("%d/%m/%Y %H:%M:%S"),
@@ -477,12 +389,6 @@ def validar_atividade(saldo_pontos, historico):
 
 
 def visualizar_pontos(saldo_pontos):
-    """
-    Exibe o saldo de pontos atual.
-
-    Parâmetros:
-        saldo_pontos (int): saldo de pontos atual.
-    """
     print("\n----- SALDO DE PONTOS -----")
     print(f"Você possui {saldo_pontos} pontos.")
 
@@ -684,9 +590,6 @@ def menu_usuario(usuarios, saldo_pontos, historico, registro_crud):
 
 
 def menu_inicial():
-    """
-    Ponto de entrada do sistema: menu de login/cadastro e loop principal da aplicação.
-    """
     usuarios = carregar_usuarios()
     saldo_pontos = carregar_pontos()
     historico = carregar_historico()
