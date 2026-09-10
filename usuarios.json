@@ -18,5 +18,10 @@
         "nome": "macaco bola",
         "email": "novaraca@gmail.com",
         "senha": "macaquinho123"
+    },
+    {
+        "nome": "FIAP",
+        "email": "fiap@outlook.com",
+        "senha": "1212"
     }
 ]

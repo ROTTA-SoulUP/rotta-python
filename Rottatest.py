@@ -1,31 +1,16 @@
-"""
-ROTTA - Sistema de mobilidade urbana sustentável (SoulUp)
-Sprint 3 - Computational Thinking Using Python
-
-Módulo responsável por:
-- Cadastro, login, edição e exclusão de usuários (CRUD)
-- Validação de atividades/postagens (simulação de IA)
-- Controle de saldo de pontos e conversão em créditos
-- Geração de QR Code para resgate
-- Chatbot de suporte (Rottinha)
-"""
-
 import json
 import os
 import time
+from datetime import datetime
 
 ARQUIVO_USUARIOS = "usuarios.json"
 ARQUIVO_PONTOS = "pontos.json"
+ARQUIVO_HISTORICO = "historico.json"
+ARQUIVO_CONSULTAS_CRUD = "consultas_crud.json"
 
+# PERSISTÊNCIA (usuários)
 
 def carregar_usuarios():
-    """
-    Carrega a lista de usuários a partir do arquivo JSON.
-
-    Retorno:
-        list[dict]: lista de usuários (nome, email, senha).
-                    Retorna lista vazia se o arquivo não existir ou estiver corrompido.
-    """
     if not os.path.exists(ARQUIVO_USUARIOS):
         return []
 
@@ -38,15 +23,6 @@ def carregar_usuarios():
 
 
 def salvar_usuarios(usuarios):
-    """
-    Salva a lista de usuários no arquivo JSON.
-
-    Parâmetros:
-        usuarios (list[dict]): lista de usuários a ser persistida.
-
-    Retorno:
-        bool: True se salvou com sucesso, False caso contrário.
-    """
     try:
         with open(ARQUIVO_USUARIOS, "w", encoding="utf-8") as arquivo:
             json.dump(usuarios, arquivo, ensure_ascii=False, indent=4)
@@ -58,14 +34,9 @@ def salvar_usuarios(usuarios):
     finally:
         pass
 
+# PONTUACAO
 
 def carregar_pontos():
-    """
-    Carrega o saldo de pontos a partir do arquivo JSON.
-
-    Retorno:
-        int: saldo de pontos. Retorna 0 se o arquivo não existir ou estiver corrompido.
-    """
     if not os.path.exists(ARQUIVO_PONTOS):
         return 0
 
@@ -78,16 +49,7 @@ def carregar_pontos():
         return 0
 
 
-def salvar_pontos(saldo_pontos):
-    """
-    Salva o saldo de pontos no arquivo JSON.
-
-    Parâmetros:
-        saldo_pontos (int): saldo atual a ser persistido.
-
-    Retorno:
-        bool: True se salvou com sucesso, False caso contrário.
-    """
+def salvar_pontos(saldo_pontos): #salva dados no json
     try:
         with open(ARQUIVO_PONTOS, "w", encoding="utf-8") as arquivo:
             json.dump({"saldo_pontos": saldo_pontos}, arquivo, ensure_ascii=False, indent=4)
@@ -97,6 +59,96 @@ def salvar_pontos(saldo_pontos):
     else:
         return True
 
+# PERSISTENCIA (histórico de eventos) — sequencia de TUPLAS
+
+
+def carregar_historico():
+    if not os.path.exists(ARQUIVO_HISTORICO):
+        return []
+
+    try:
+        with open(ARQUIVO_HISTORICO, "r", encoding="utf-8") as arquivo:
+            dados = json.load(arquivo)
+            return [tuple(evento) for evento in dados]
+    except (json.JSONDecodeError, OSError) as erro:
+        print(f"Aviso: não foi possível ler {ARQUIVO_HISTORICO} ({erro}). Histórico iniciado vazio.")
+        return []
+
+
+def salvar_historico(historico):
+    """
+    Salva o histórico de eventos (lista de tuplas) no arquivo JSON.
+
+    Parâmetros:
+        historico (list[tuple]): lista de tuplas (data, tipo, pontos).
+
+    Retorno:
+        bool: True se salvou com sucesso, False caso contrário.
+    """
+    try:
+        with open(ARQUIVO_HISTORICO, "w", encoding="utf-8") as arquivo:
+            json.dump([list(evento) for evento in historico], arquivo, ensure_ascii=False, indent=4)
+    except OSError as erro:
+        print(f"Erro ao salvar histórico: {erro}")
+        return False
+    else:
+        return True
+
+
+def registrar_evento(historico, tipo, pontos):
+    """
+    Registra um novo evento no histórico (função de armazenamento em sequência).
+
+    Parâmetros:
+        historico (list[tuple]): histórico atual carregado em memória.
+        tipo (str): tipo do evento (ex.: "atividade", "conversao", "qrcode").
+        pontos (int): quantidade de pontos envolvida no evento (positivo ou negativo).
+
+    Retorno:
+        list[tuple]: histórico atualizado, já persistido em disco.
+    """
+    data_hora = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+    evento = (data_hora, tipo, pontos)
+
+    try:
+        historico.append(evento)
+        salvar_historico(historico)
+    except Exception as erro:
+        print(f"Erro ao registrar evento no histórico: {erro}")
+
+    return historico
+
+
+def filtrar_historico_por_tipo(historico, tipo):
+    """
+    Filtra os eventos do histórico por tipo (função de filtragem sobre sequência).
+
+    Parâmetros:
+        historico (list[tuple]): histórico completo.
+        tipo (str): tipo de evento a ser filtrado (ex.: "atividade").
+
+    Retorno:
+        list[tuple]: subconjunto do histórico cujo tipo corresponde ao informado.
+    """
+    return [evento for evento in historico if evento[1].lower() == tipo.lower()]
+
+
+def listar_historico(historico):
+    """
+    Exibe os eventos de um histórico (lista de tuplas) de forma legível.
+
+    Parâmetros:
+        historico (list[tuple]): eventos a serem exibidos.
+    """
+    if not historico:
+        print("Nenhum evento encontrado.")
+        return
+
+    for data_hora, tipo, pontos in historico:
+        sinal = "+" if pontos >= 0 else ""
+        print(f"[{data_hora}] {tipo.upper():10s} {sinal}{pontos} pontos")
+
+# VALIDACÃO DE DADOS
 
 def email_valido(email):
     """
@@ -106,9 +158,13 @@ def email_valido(email):
         email (str): e-mail a ser validado.
 
     Retorno:
-        bool: True se o e-mail contém '@' e '.', False caso contrário.
+        bool: True se o e-mail contém '@' e '.', com texto antes e depois, False caso contrário.
     """
-    return "@" in email and "." in email
+    if "@" not in email or "." not in email:
+        return False
+
+    usuario, _, dominio = email.partition("@")
+    return usuario != "" and "." in dominio and not dominio.startswith(".")
 
 
 def buscar_usuario_por_email(usuarios, email):
@@ -128,16 +184,86 @@ def buscar_usuario_por_email(usuarios, email):
     return None
 
 
-def cadastrar_usuario(usuarios):
+def filtrar_usuarios_por_nome(usuarios, termo_busca):
     """
-    Cadastra um novo usuário (Create), com validação de nome, e-mail e senha.
+    Filtra usuários cujo nome contenha o termo de busca (função de filtragem
+    sobre sequência de dicionários), sem diferenciar maiúsculas/minúsculas.
 
     Parâmetros:
-        usuarios (list[dict]): lista de usuários carregada em memória.
+        usuarios (list[dict]): lista completa de usuários.
+        termo_busca (str): trecho do nome a ser procurado.
 
     Retorno:
-        list[dict]: lista de usuários atualizada.
+        list[dict]: nova lista contendo apenas os usuários cujo nome
+                    contém o termo informado.
     """
+    termo_busca = termo_busca.strip().lower()
+    return [usuario for usuario in usuarios if termo_busca in usuario["nome"].lower()]
+
+
+def ordenar_usuarios_por_nome(usuarios):
+    """
+    Organiza os usuários em ordem alfabética pelo nome (função de organização
+    de sequência), sem alterar a lista original.
+
+    Parâmetros:
+        usuarios (list[dict]): lista de usuários a ser ordenada.
+
+    Retorno:
+        list[dict]: nova lista de usuários ordenada por nome.
+    """
+    return sorted(usuarios, key=lambda usuario: usuario["nome"].lower())
+
+# REGISTRO E EXPORTACÃO DAS CONSULTAS CRUD
+
+def registrar_consulta_crud(registro_crud, operacao, dados):
+    """
+    Registra, em memória, o resultado real de uma operação de CRUD executada
+    pelo usuário (Create, Read, Update ou Delete), para posterior exportação.
+
+    Parâmetros:
+        registro_crud (list[dict]): lista de consultas já registradas na sessão.
+        operacao (str): "create", "read", "update" ou "delete".
+        dados (dict): dados relevantes da operação (ex.: usuário afetado).
+
+    Retorno:
+        list[dict]: registro de consultas atualizado.
+    """
+    consulta = {
+        "operacao": operacao,
+        "data_hora": datetime.now().strftime("%d/%m/%Y %H:%M:%S"),
+        "dados": dados,
+    }
+    registro_crud.append(consulta)
+    return registro_crud
+
+
+def exportar_consultas_crud(registro_crud):
+    print("\n----- EXPORTAR CONSULTAS CRUD -----")
+
+    try:
+        if not registro_crud:
+            raise ValueError("Nenhuma operação de CRUD foi realizada nesta sessão ainda.")
+
+        with open(ARQUIVO_CONSULTAS_CRUD, "w", encoding="utf-8") as arquivo:
+            json.dump(registro_crud, arquivo, ensure_ascii=False, indent=4)
+
+    except ValueError as erro:
+        print(f"Erro: {erro}")
+        return False
+    except OSError as erro:
+        print(f"Erro ao exportar consultas: {erro}")
+        return False
+    else:
+        print(f"{len(registro_crud)} operação(ões) exportada(s) para '{ARQUIVO_CONSULTAS_CRUD}' com sucesso!")
+        return True
+    finally:
+        print("Exportação de consultas CRUD finalizada.")
+
+
+# CRUD DE USUARIOS
+
+def cadastrar_usuario(usuarios, registro_crud):
     print("\n----- CADASTRO DE USUÁRIO -----")
 
     nome = input("Digite seu nome: ").strip()
@@ -150,7 +276,7 @@ def cadastrar_usuario(usuarios):
 
     if buscar_usuario_por_email(usuarios, email):
         print("Já existe um usuário com este e-mail.")
-        return usuarios
+        return usuarios, registro_crud
 
     senha = input("Digite sua senha: ").strip()
     while len(senha) < 4:
@@ -166,22 +292,16 @@ def cadastrar_usuario(usuarios):
     else:
         if sucesso:
             print(f"\nUsuário {nome} cadastrado com sucesso!")
+            registro_crud = registrar_consulta_crud(
+                registro_crud, "create", {"nome": nome, "email": email}
+            )
     finally:
         print("Operação de cadastro finalizada.")
 
-    return usuarios
+    return usuarios, registro_crud
 
 
-def editar_usuario(usuarios):
-    """
-    Edita os dados (nome e/ou senha) de um usuário existente (Update).
-
-    Parâmetros:
-        usuarios (list[dict]): lista de usuários carregada em memória.
-
-    Retorno:
-        list[dict]: lista de usuários atualizada.
-    """
+def editar_usuario(usuarios, registro_crud):
     print("\n----- EDITAR USUÁRIO -----")
 
     email = input("Digite o e-mail do usuário que deseja editar: ").strip()
@@ -208,22 +328,16 @@ def editar_usuario(usuarios):
     else:
         salvar_usuarios(usuarios)
         print("Usuário atualizado com sucesso!")
+        registro_crud = registrar_consulta_crud(
+            registro_crud, "update", {"nome": usuario["nome"], "email": usuario["email"]}
+        )
     finally:
         print("Operação de edição finalizada.")
 
-    return usuarios
+    return usuarios, registro_crud
 
 
-def excluir_usuario(usuarios):
-    """
-    Remove um usuário existente pelo e-mail (Delete).
-
-    Parâmetros:
-        usuarios (list[dict]): lista de usuários carregada em memória.
-
-    Retorno:
-        list[dict]: lista de usuários atualizada.
-    """
+def excluir_usuario(usuarios, registro_crud):
     print("\n----- EXCLUIR USUÁRIO -----")
 
     email = input("Digite o e-mail do usuário: ").strip()
@@ -241,19 +355,16 @@ def excluir_usuario(usuarios):
     else:
         salvar_usuarios(usuarios)
         print("Conta excluída com sucesso.")
+        registro_crud = registrar_consulta_crud(
+            registro_crud, "delete", {"nome": usuario["nome"], "email": usuario["email"]}
+        )
     finally:
         print("Operação de exclusão finalizada.")
 
-    return usuarios
+    return usuarios, registro_crud
 
 
 def listar_usuarios(usuarios):
-    """
-    Lista (Read) todos os usuários cadastrados, exibindo nome e e-mail.
-
-    Parâmetros:
-        usuarios (list[dict]): lista de usuários carregada em memória.
-    """
     print("\n----- USUÁRIOS CADASTRADOS -----")
 
     if not usuarios:
@@ -264,16 +375,60 @@ def listar_usuarios(usuarios):
         print(f"{indice}. {usuario['nome']} - {usuario['email']}")
 
 
+def consultar_usuario(usuarios, registro_crud):
+    print("\n----- CONSULTAR USUÁRIO -----")
+
+    email = input("Digite o e-mail do usuário a consultar: ").strip()
+
+    try:
+        usuario = buscar_usuario_por_email(usuarios, email)
+
+        if usuario is None:
+            raise ValueError("E-mail não encontrado.")
+
+    except ValueError as erro:
+        print(f"Erro: {erro}")
+    else:
+        print(f"Nome: {usuario['nome']}")
+        print(f"E-mail: {usuario['email']}")
+        registro_crud = registrar_consulta_crud(
+            registro_crud, "read", {"nome": usuario["nome"], "email": usuario["email"]}
+        )
+    finally:
+        print("Consulta finalizada.")
+
+    return registro_crud
+
+
+def buscar_usuarios_menu(usuarios, registro_crud):
+    print("\n----- BUSCAR / ORGANIZAR USUÁRIOS -----")
+    print("1 - Consultar usuário por e-mail")
+    print("2 - Filtrar por nome")
+    print("3 - Listar todos em ordem alfabética")
+    opcao = input("Escolha uma opção: ").strip()
+
+    try:
+        if opcao == "1":
+            registro_crud = consultar_usuario(usuarios, registro_crud)
+        elif opcao == "2":
+            termo = input("Digite parte do nome a buscar: ").strip()
+            if termo == "":
+                raise ValueError("Termo de busca não pode ser vazio.")
+            resultado = filtrar_usuarios_por_nome(usuarios, termo)
+            listar_usuarios(resultado)
+        elif opcao == "3":
+            listar_usuarios(ordenar_usuarios_por_nome(usuarios))
+        else:
+            print("Opção inválida.")
+    except ValueError as erro:
+        print(f"Erro: {erro}")
+    finally:
+        print("Busca finalizada.")
+
+    return registro_crud
+
+
 def login(usuarios):
-    """
-    Autentica um usuário pelo e-mail e senha.
-
-    Parâmetros:
-        usuarios (list[dict]): lista de usuários carregada em memória.
-
-    Retorno:
-        dict | None: o usuário autenticado, ou None se as credenciais forem inválidas.
-    """
     print("\n----- LOGIN -----")
 
     email = input("Digite seu e-mail: ").strip()
@@ -290,17 +445,9 @@ def login(usuarios):
     time.sleep(1.5)
     return None
 
+# PONTOS E RECOMPENSAS
 
-def validar_atividade(saldo_pontos):
-    """
-    Simula a validação de um comprovante de atividade via IA e credita pontos.
-
-    Parâmetros:
-        saldo_pontos (int): saldo de pontos atual.
-
-    Retorno:
-        int: saldo de pontos atualizado.
-    """
+def validar_atividade(saldo_pontos, historico):
     print("\n----- VALIDAR ATIVIDADE -----")
 
     comprovante = input("Informe o comprovante: ").strip()
@@ -319,13 +466,14 @@ def validar_atividade(saldo_pontos):
         print(f"Erro: {erro}")
     else:
         salvar_pontos(saldo_pontos)
+        historico = registrar_evento(historico, "atividade", 50)
         time.sleep(1.5)
         print("Você ganhou 50 pontos!\n")
         print(f"Saldo atual: {saldo_pontos} pontos.")
     finally:
         print("Validação de atividade finalizada.")
 
-    return saldo_pontos
+    return saldo_pontos, historico
 
 
 def visualizar_pontos(saldo_pontos):
@@ -339,16 +487,7 @@ def visualizar_pontos(saldo_pontos):
     print(f"Você possui {saldo_pontos} pontos.")
 
 
-def converter_pontos(saldo_pontos):
-    """
-    Converte 100 pontos em uma passagem, se houver saldo suficiente.
-
-    Parâmetros:
-        saldo_pontos (int): saldo de pontos atual.
-
-    Retorno:
-        int: saldo de pontos atualizado.
-    """
+def converter_pontos(saldo_pontos, historico):
     print("\n----- CONVERTER PONTOS -----")
 
     try:
@@ -361,38 +500,16 @@ def converter_pontos(saldo_pontos):
         print(f"Erro: {erro}")
     else:
         salvar_pontos(saldo_pontos)
+        historico = registrar_evento(historico, "conversao", -100)
         print("Passagem gerada com sucesso!")
         print(f"Saldo restante: {saldo_pontos} pontos.")
     finally:
         print("Conversão de pontos finalizada.")
 
-    return saldo_pontos
+    return saldo_pontos, historico
 
 
-def chatbot():
-    """
-    Registra uma dúvida enviada pelo usuário ao chatbot Rottinha.
-    """
-    print("\n----- Rottinha CHATBOT -----")
-
-    pergunta = input("Digite sua dúvida: ").strip()
-
-    if pergunta:
-        print("Sua solicitação foi registrada.")
-    else:
-        print("Nenhuma pergunta informada.")
-
-
-def gerar_qrcode(saldo_pontos):
-    """
-    Gera um QR Code de resgate, descontando 150 pontos do saldo.
-
-    Parâmetros:
-        saldo_pontos (int): saldo de pontos atual.
-
-    Retorno:
-        int: saldo de pontos atualizado.
-    """
+def gerar_qrcode(saldo_pontos, historico):
     print("\n----- GERAR QR CODE -----")
 
     try:
@@ -406,6 +523,7 @@ def gerar_qrcode(saldo_pontos):
         print(f"Saldo atual: {saldo_pontos} pontos.")
     else:
         salvar_pontos(saldo_pontos)
+        historico = registrar_evento(historico, "qrcode", -150)
 
         qr_code = """
 █████████████████████████
@@ -428,88 +546,117 @@ def gerar_qrcode(saldo_pontos):
     finally:
         print("Geração de QR Code finalizada.")
 
-    return saldo_pontos
+    return saldo_pontos, historico
 
 
-def demonstrar_crud(usuarios):
-    """
-    Executa um exemplo de cada operação do CRUD (Create, Read, Update, Delete)
-    sobre um usuário de demonstração e exporta o resultado de cada etapa
-    para um arquivo JSON.
-
-    Parâmetros:
-        usuarios (list[dict]): lista de usuários carregada em memória.
-
-    Retorno:
-        list[dict]: lista de usuários atualizada (o usuário de demonstração
-                    é removido ao final, preservando os dados reais).
-    """
-    print("\n----- DEMONSTRAÇÃO DO CRUD -----")
-
-    resultado = {}
-    email_demo = "demo.crud@rotta.com"
+def menu_historico(historico):
+    print("\n----- HISTÓRICO DE PONTOS -----")
+    print("1 - Ver histórico completo")
+    print("2 - Filtrar por tipo (atividade, conversao, qrcode)")
+    opcao = input("Escolha uma opção: ").strip()
 
     try:
-        # CREATE
-        usuario_demo = {"nome": "Usuário Demonstração", "email": email_demo, "senha": "demo1234"}
-        usuarios.append(usuario_demo)
-        resultado["create"] = dict(usuario_demo)
-        print(f"[CREATE] Usuário criado: {usuario_demo['nome']} ({usuario_demo['email']})")
-
-        # READ
-        usuario_lido = buscar_usuario_por_email(usuarios, email_demo)
-        resultado["read"] = dict(usuario_lido)
-        print(f"[READ] Usuário lido: {usuario_lido['nome']} ({usuario_lido['email']})")
-
-        # UPDATE
-        usuario_lido["nome"] = "Usuário Demonstração Editado"
-        resultado["update"] = dict(usuario_lido)
-        print(f"[UPDATE] Usuário atualizado: {usuario_lido['nome']}")
-
-        # DELETE
-        usuarios.remove(usuario_lido)
-        resultado["delete"] = {"email_removido": email_demo, "status": "removido com sucesso"}
-        print(f"[DELETE] Usuário removido: {email_demo}")
-
-    except Exception as erro:
-        print(f"Erro durante a demonstração do CRUD: {erro}")
-    else:
-        try:
-            with open("resultado_crud.json", "w", encoding="utf-8") as arquivo:
-                json.dump(resultado, arquivo, ensure_ascii=False, indent=4)
-        except OSError as erro:
-            print(f"Erro ao exportar resultado do CRUD: {erro}")
+        if opcao == "1":
+            listar_historico(historico)
+        elif opcao == "2":
+            tipo = input("Digite o tipo a filtrar: ").strip()
+            if tipo == "":
+                raise ValueError("Tipo não pode ser vazio.")
+            listar_historico(filtrar_historico_por_tipo(historico, tipo))
         else:
-            print("\nResultado do CRUD exportado para 'resultado_crud.json' com sucesso!")
+            print("Opção inválida.")
+    except ValueError as erro:
+        print(f"Erro: {erro}")
     finally:
-        print("Demonstração do CRUD finalizada.")
-
-    return usuarios
+        print("Consulta ao histórico finalizada.")
 
 
-def menu_usuario(usuarios, saldo_pontos):
-    """
-    Exibe o menu principal do sistema (pós-login) e trata as opções escolhidas.
+# CHATBOT
 
-    Parâmetros:
-        usuarios (list[dict]): lista de usuários carregada em memória.
-        saldo_pontos (int): saldo de pontos atual.
+def chatbot():
+    print("\n----- Rottinha CHATBOT -----")
 
-    Retorno:
-        tuple[list[dict], int]: usuários e saldo de pontos atualizados.
-    """
+    pergunta = input("Digite sua dúvida: ").strip()
+
+    if pergunta:
+        print("Sua solicitação foi registrada.")
+    else:
+        print("Nenhuma pergunta informada.")
+
+
+# MENUS (com submenus)
+
+def menu_pontos_recompensas(saldo_pontos, historico):
+    while True:
+        print("\n" + "-" * 30)
+        print("     PONTOS E RECOMPENSAS")
+        print("-" * 30)
+        print("1 - Validar atividade")
+        print("2 - Visualizar pontos")
+        print("3 - Converter pontos em passagem")
+        print("4 - Gerar QR Code")
+        print("5 - Ver histórico de pontos")
+        print("0 - Voltar")
+        print("-" * 30)
+
+        opcao = input("Escolha uma opção: ").strip()
+        print("-" * 30)
+
+        match opcao:
+            case "1":
+                saldo_pontos, historico = validar_atividade(saldo_pontos, historico)
+            case "2":
+                visualizar_pontos(saldo_pontos)
+            case "3":
+                saldo_pontos, historico = converter_pontos(saldo_pontos, historico)
+            case "4":
+                saldo_pontos, historico = gerar_qrcode(saldo_pontos, historico)
+            case "5":
+                menu_historico(historico)
+            case "0":
+                break
+            case _:
+                print("Opção inválida.")
+
+    return saldo_pontos, historico
+
+
+def menu_minha_conta(usuarios, registro_crud):
+    while True:
+        print("\n" + "-" * 30)
+        print("         MINHA CONTA")
+        print("-" * 30)
+        print("1 - Editar meu cadastro")
+        print("2 - Excluir minha conta")
+        print("0 - Voltar")
+        print("-" * 30)
+
+        opcao = input("Escolha uma opção: ").strip()
+        print("-" * 30)
+
+        match opcao:
+            case "1":
+                usuarios, registro_crud = editar_usuario(usuarios, registro_crud)
+            case "2":
+                usuarios, registro_crud = excluir_usuario(usuarios, registro_crud)
+            case "0":
+                break
+            case _:
+                print("Opção inválida.")
+
+    return usuarios, registro_crud
+
+
+def menu_usuario(usuarios, saldo_pontos, historico, registro_crud):
     while True:
         print("\n" + "-" * 30)
         print("           ROTTA")
         print("-" * 30)
-        print("1 - Validar atividade")
-        print("2 - Visualizar pontos")
-        print("3 - Converter pontos")
+        print("1 - Pontos e recompensas")
+        print("2 - Minha conta")
+        print("3 - Buscar / consultar usuários")
         print("4 - Chatbot")
-        print("5 - Editar meu cadastro")
-        print("6 - Excluir minha conta")
-        print("7 - Gerar QR Code")
-        print("8 - Demonstração do CRUD (exportar JSON)")
+        print("9 - Exportar consultas CRUD para JSON")
         print("0 - Sair")
         print("-" * 30)
 
@@ -518,28 +665,22 @@ def menu_usuario(usuarios, saldo_pontos):
 
         match opcao:
             case "1":
-                saldo_pontos = validar_atividade(saldo_pontos)
+                saldo_pontos, historico = menu_pontos_recompensas(saldo_pontos, historico)
             case "2":
-                visualizar_pontos(saldo_pontos)
+                usuarios, registro_crud = menu_minha_conta(usuarios, registro_crud)
             case "3":
-                saldo_pontos = converter_pontos(saldo_pontos)
+                registro_crud = buscar_usuarios_menu(usuarios, registro_crud)
             case "4":
                 chatbot()
-            case "5":
-                usuarios = editar_usuario(usuarios)
-            case "6":
-                usuarios = excluir_usuario(usuarios)
-            case "7":
-                saldo_pontos = gerar_qrcode(saldo_pontos)
-            case "8":
-                usuarios = demonstrar_crud(usuarios)
+            case "9":
+                exportar_consultas_crud(registro_crud)
             case "0":
                 print("\nEncerrando sistema...")
                 break
             case _:
                 print("Opção inválida.")
 
-    return usuarios, saldo_pontos
+    return usuarios, saldo_pontos, historico, registro_crud
 
 
 def menu_inicial():
@@ -548,6 +689,8 @@ def menu_inicial():
     """
     usuarios = carregar_usuarios()
     saldo_pontos = carregar_pontos()
+    historico = carregar_historico()
+    registro_crud = []
 
     while True:
         print("\n" + "-" * 30)
@@ -565,9 +708,11 @@ def menu_inicial():
             case "1":
                 usuario_logado = login(usuarios)
                 if usuario_logado is not None:
-                    usuarios, saldo_pontos = menu_usuario(usuarios, saldo_pontos)
+                    usuarios, saldo_pontos, historico, registro_crud = menu_usuario(
+                        usuarios, saldo_pontos, historico, registro_crud
+                    )
             case "2":
-                usuarios = cadastrar_usuario(usuarios)
+                usuarios, registro_crud = cadastrar_usuario(usuarios, registro_crud)
             case "3":
                 listar_usuarios(usuarios)
             case "0":
@@ -575,7 +720,6 @@ def menu_inicial():
                 break
             case _:
                 print("Opção inválida.")
-
 
 if __name__ == "__main__":
     menu_inicial()
