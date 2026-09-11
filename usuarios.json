@@ -23,5 +23,10 @@
         "nome": "FIAP",
         "email": "fiap@outlook.com",
         "senha": "1212"
+    },
+    {
+        "nome": "guix",
+        "email": "guix@gmail.com",
+        "senha": "1212"
     }
 ]

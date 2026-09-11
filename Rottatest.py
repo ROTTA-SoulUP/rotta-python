@@ -480,7 +480,7 @@ def menu_historico(historico):
 # CHATBOT
 
 def chatbot():
-    print("\n----- Rottinha CHATBOT -----")
+    print("\n----- CAPI CHATBOT -----")
 
     pergunta = input("Digite sua dúvida: ").strip()
 
@@ -488,6 +488,23 @@ def chatbot():
         print("Sua solicitação foi registrada.")
     else:
         print("Nenhuma pergunta informada.")
+
+
+def enviar_creditos(saldo_pontos, historico):
+    print("\n----- ENVIAR CREDITOS PARA CARTAO ROTTA -----")
+
+    enviar = input("Deseja converter seus pontos em credito? S/N: ").strip().upper()
+
+    if enviar == "S":
+        print("Creditos enviados para o Cartao ROTTA!")
+
+    elif enviar == "N":
+        print("Conversao cancelada.")
+
+    else:
+        print("Opcao invalida.")
+
+    return saldo_pontos, historico
 
 
 # MENUS (com submenus)
@@ -501,7 +518,8 @@ def menu_pontos_recompensas(saldo_pontos, historico):
         print("2 - Visualizar pontos")
         print("3 - Converter pontos em passagem")
         print("4 - Gerar QR Code")
-        print("5 - Ver histórico de pontos")
+        print("5 - Enviar creditos para cartão ROTTA")
+        print("6 - Ver histórico de pontos")
         print("0 - Voltar")
         print("-" * 30)
 
@@ -518,6 +536,8 @@ def menu_pontos_recompensas(saldo_pontos, historico):
             case "4":
                 saldo_pontos, historico = gerar_qrcode(saldo_pontos, historico)
             case "5":
+                saldo_pontos, historico = enviar_creditos(saldo_pontos, historico)
+            case "6":
                 menu_historico(historico)
             case "0":
                 break
