@@ -1,0 +1,10 @@
+[
+    {
+        "operacao": "create",
+        "data_hora": "10/09/2026 13:15:45",
+        "dados": {
+            "nome": "FIAP",
+            "email": "fiap@outlook.com"
+        }
+    }
+]
