@@ -502,7 +502,7 @@ def enviar_creditos(saldo_pontos, historico):
         print("Conversao cancelada.")
 
     else:
-        print("Opcao invalida.")
+        print("Opcao invalida.") #olandaopufaiufauvf
 
     return saldo_pontos, historico
 
