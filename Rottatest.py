@@ -489,7 +489,6 @@ def chatbot():
     else:
         print("Nenhuma pergunta informada.")
 
-
 def enviar_creditos(saldo_pontos, historico):
     print("\n----- ENVIAR CREDITOS PARA CARTAO ROTTA -----")
 
@@ -502,7 +501,7 @@ def enviar_creditos(saldo_pontos, historico):
         print("Conversao cancelada.")
 
     else:
-        print("Opcao invalida.") #olandaopufaiufauvf
+        print("Opcao invalida.") 
 
     return saldo_pontos, historico
 
