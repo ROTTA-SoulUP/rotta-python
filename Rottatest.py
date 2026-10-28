@@ -219,65 +219,61 @@ def cadastrar_usuario(usuarios, registro_crud):
     return usuarios, registro_crud
 
 
-def editar_usuario(usuarios, registro_crud):
-    print("\n----- EDITAR USUÁRIO -----")
+def editar_usuario(usuarios, registro_crud, usuario_logado):
+    """Edita somente a conta recebida da sessão autenticada."""
+    print("\n----- EDITAR MEU CADASTRO -----")
 
-    email = input("Digite o e-mail do usuário que deseja editar: ").strip()
+    if not any(usuario is usuario_logado for usuario in usuarios):
+        print("Sessão inválida. Faça login novamente.")
+        return usuarios, registro_crud
 
-    try:
-        usuario = buscar_usuario_por_email(usuarios, email)
+    novo_nome = input(f"Novo nome (Enter para manter '{usuario_logado['nome']}'): ").strip()
+    nova_senha = input("Nova senha (Enter para manter a atual, mínimo 4 caracteres): ").strip()
+    while nova_senha and len(nova_senha) < 4:
+        nova_senha = input("Senha inválida. Digite ao menos 4 caracteres ou Enter para manter: ").strip()
 
-        if usuario is None:
-            raise ValueError("E-mail não encontrado.")
+    dados_anteriores = usuario_logado.copy()
+    if novo_nome:
+        usuario_logado["nome"] = novo_nome
+    if nova_senha:
+        usuario_logado["senha"] = nova_senha
 
-        novo_nome = input(f"Novo nome (Enter para manter '{usuario['nome']}'): ").strip()
-        nova_senha = input("Nova senha (Enter para manter a atual, mínimo 4 caracteres): ").strip()
-
-        if novo_nome != "":
-            usuario["nome"] = novo_nome
-
-        if nova_senha != "":
-            while len(nova_senha) < 4:
-                nova_senha = input("Senha inválida (mínimo 4 caracteres). Digite novamente: ").strip()
-            usuario["senha"] = nova_senha
-
-    except ValueError as erro:
-        print(f"Erro: {erro}")
-    else:
-        salvar_usuarios(usuarios)
+    if salvar_usuarios(usuarios):
         print("Usuário atualizado com sucesso!")
-        registro_crud = registrar_consulta_crud(
-            registro_crud, "update", {"nome": usuario["nome"], "email": usuario["email"]}
+        registrar_consulta_crud(
+            registro_crud, "update",
+            {"nome": usuario_logado["nome"], "email": usuario_logado["email"]}
         )
-    finally:
-        print("Operação de edição finalizada.")
+    else:
+        usuario_logado.update(dados_anteriores)
+        print("Não foi possível salvar. Cadastro mantido sem alterações.")
 
     return usuarios, registro_crud
 
 
-def excluir_usuario(usuarios, registro_crud):
-    print("\n----- EXCLUIR USUÁRIO -----")
+def excluir_usuario(usuarios, registro_crud, usuario_logado):
+    """Exclui somente a conta autenticada, após confirmação e salvamento."""
+    print("\n----- EXCLUIR MINHA CONTA -----")
 
-    email = input("Digite o e-mail do usuário: ").strip()
+    if not any(usuario is usuario_logado for usuario in usuarios):
+        print("Sessão inválida. Faça login novamente.")
+        return usuarios, registro_crud
 
-    try:
-        usuario = buscar_usuario_por_email(usuarios, email)
+    confirmacao = input("Deseja excluir sua conta? S/N: ").strip().upper()
+    if confirmacao != "S":
+        print("Exclusão cancelada.")
+        return usuarios, registro_crud
 
-        if usuario is None:
-            raise ValueError("E-mail não encontrado.")
-
-        usuarios.remove(usuario)
-
-    except ValueError as erro:
-        print(f"Erro: {erro}")
-    else:
-        salvar_usuarios(usuarios)
+    usuarios_restantes = [usuario for usuario in usuarios if usuario is not usuario_logado]
+    if salvar_usuarios(usuarios_restantes):
+        usuarios[:] = usuarios_restantes
         print("Conta excluída com sucesso.")
-        registro_crud = registrar_consulta_crud(
-            registro_crud, "delete", {"nome": usuario["nome"], "email": usuario["email"]}
+        registrar_consulta_crud(
+            registro_crud, "delete",
+            {"nome": usuario_logado["nome"], "email": usuario_logado["email"]}
         )
-    finally:
-        print("Operação de exclusão finalizada.")
+    else:
+        print("Não foi possível excluir. Sua conta foi mantida.")
 
     return usuarios, registro_crud
 
@@ -552,8 +548,8 @@ def menu_pontos_recompensas(saldo_pontos, historico):
     return saldo_pontos, historico
 
 
-def menu_minha_conta(usuarios, registro_crud):
-    while True:
+def menu_minha_conta(usuarios, registro_crud, usuario_logado):
+    while any(usuario is usuario_logado for usuario in usuarios):
         print("\n" + "-" * 30)
         print("         MINHA CONTA")
         print("-" * 30)
@@ -567,9 +563,9 @@ def menu_minha_conta(usuarios, registro_crud):
 
         match opcao:
             case "1":
-                usuarios, registro_crud = editar_usuario(usuarios, registro_crud)
+                usuarios, registro_crud = editar_usuario(usuarios, registro_crud, usuario_logado)
             case "2":
-                usuarios, registro_crud = excluir_usuario(usuarios, registro_crud)
+                usuarios, registro_crud = excluir_usuario(usuarios, registro_crud, usuario_logado)
             case "0":
                 break
             case _:
@@ -578,8 +574,11 @@ def menu_minha_conta(usuarios, registro_crud):
     return usuarios, registro_crud
 
 
-def menu_usuario(usuarios, saldo_pontos, historico, registro_crud):
+def menu_usuario(usuarios, saldo_pontos, historico, registro_crud, usuario_logado):
     while True:
+        if not any(usuario is usuario_logado for usuario in usuarios):
+            print("Sessão encerrada. Retornando ao menu de login.")
+            break
         print("\n" + "-" * 30)
         print("           ROTTA")
         print("-" * 30)
@@ -598,7 +597,7 @@ def menu_usuario(usuarios, saldo_pontos, historico, registro_crud):
             case "1":
                 saldo_pontos, historico = menu_pontos_recompensas(saldo_pontos, historico)
             case "2":
-                usuarios, registro_crud = menu_minha_conta(usuarios, registro_crud)
+                usuarios, registro_crud = menu_minha_conta(usuarios, registro_crud, usuario_logado)
             case "3":
                 registro_crud = buscar_usuarios_menu(usuarios, registro_crud)
             case "4":
@@ -637,7 +636,7 @@ def menu_inicial():
                 usuario_logado = login(usuarios)
                 if usuario_logado is not None:
                     usuarios, saldo_pontos, historico, registro_crud = menu_usuario(
-                        usuarios, saldo_pontos, historico, registro_crud
+                        usuarios, saldo_pontos, historico, registro_crud, usuario_logado
                     )
             case "2":
                 usuarios, registro_crud = cadastrar_usuario(usuarios, registro_crud)
