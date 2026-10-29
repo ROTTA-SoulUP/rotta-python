@@ -1,0 +1,30 @@
+{
+    "usuario": {
+        "id_usuario": 2,
+        "nm_usuario": "thiago",
+        "email": "thiago@gmail.com",
+        "dt_cadastro": "2026-10-29T02:46:13.566300"
+    },
+    "saldo_pontos": 15,
+    "atividades": [
+        {
+            "id_participacao": 1,
+            "nm_desafio": "Separar reciclaveis",
+            "ds_descricao": "Separar reciclaveis",
+            "referencia_arquivo": "vvideo",
+            "st_resultado": "APROVADO",
+            "metodo": "SIMULADA"
+        }
+    ],
+    "movimentacoes": [
+        {
+            "id_movimentacao": 1,
+            "tp_movimentacao": "CREDITO",
+            "valor": 15,
+            "ds_descricao": "Separar reciclaveis",
+            "dt_movimentacao": "2026-10-29T03:11:08.153499"
+        }
+    ],
+    "resgates": [],
+    "operacoes_da_sessao": []
+}
