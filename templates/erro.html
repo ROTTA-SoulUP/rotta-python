@@ -1,0 +1,1 @@
+{% extends 'base.html' %}{% block conteudo %}<section class="card erro-page"><span class="eyebrow">VAMOS TENTAR NOVAMENTE</span><h1>Não foi possível concluir.</h1><p role="alert">{{ mensagem }}</p><a class="primary" href="{{ url_for('inicio') if session.get('uid') else url_for('login') }}">Voltar à ROTTA →</a></section>{% endblock %}

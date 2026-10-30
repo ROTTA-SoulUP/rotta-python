@@ -47,7 +47,7 @@ Os JSON antigos ficam preservados, mas não são utilizados nem migrados automat
 - O usuário digita o que fez e escolhe aprovação ou rejeição na simulação. O resultado é gravado com método SIMULADA. Não há análise real por IA, upload de mídia ou proteção contra repetição da mesma comprovação.
 - QR Codes contêm códigos DEMO únicos, sem validade em catracas. Resgates não enviam dinheiro nem créditos a operadoras.
 - A Capi permanece sem integração. A API pública de clima está integrada; a análise real de mídias ainda precisa ser desenvolvida.
-- O aplicativo é executado no terminal. Não é um sistema web nem uma entrega completa de todos os itens da Sprint 4.
+- O projeto possui versão de terminal (Rottatest.py) e interface web local (app_web.py), ambas usando o mesmo Oracle. Veja GUIA_WEB.md. Vídeo e documentação final ainda fazem parte da entrega da Sprint 4.
 
 ## Roteiro para conferir na sua conexão
 
@@ -72,3 +72,6 @@ Usa apenas a biblioteca padrão Python (urllib e json), sem dependência ou chav
 
 ### Como demonstrar no vídeo
 Abra a opção 5, procure a cidade e explique as duas requisições GET: busca das coordenadas e consulta meteorológica. Mostre o resultado, a dica baseada na precipitação e o tratamento de erros. Exporte pela opção 9 e mostre a entrada consulta_api_clima no JSON. Explique que os valores vêm da API e não são fixos no código.
+
+## Interface web
+A interface Flask foi adicionada. Instale requirements.txt atualizado e execute python app_web.py. Consulte GUIA_WEB.md para acesso e demonstração da integração nos dois sentidos.
