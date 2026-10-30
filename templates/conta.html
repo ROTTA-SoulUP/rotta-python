@@ -1,1 +1,37 @@
-{% extends 'base.html' %}{% block conteudo %}<div class="page-head"><div><span class="eyebrow">SEU ESPAÇO</span><h1>Minha conta</h1><p>Gerencie os seus dados de acesso à ROTTA.</p></div></div><div class="grid"><section class="card"><h2>Dados do cadastro</h2><form method="post"><input type="hidden" name="csrf" value="{{ session.csrf }}"><label for="nome">Nome</label><input name="nome" id="nome" value="{{ usuario.nm_usuario }}" maxlength="100" required><label for="email">E-mail</label><input id="email" value="{{ usuario.email }}" readonly><label for="senha">Nova senha <small>(opcional)</small></label><input id="senha" name="senha" type="text" minlength="4" maxlength="128" autocomplete="off"><small>Deixe vazio para manter a atual. A nova senha fica visível.</small><button class="primary wide">Salvar alterações</button></form></section><section class="card"><span class="eyebrow">ENCERRAR SUA JORNADA</span><h2>Excluir minha conta</h2><p>Isso remove sua conta, saldo, atividades, histórico e resgates. Não pode ser desfeito.</p><form method="post" action="{{ url_for('excluir') }}"><input type="hidden" name="csrf" value="{{ session.csrf }}"><label for="confirmacao">Digite EXCLUIR para confirmar</label><input name="confirmacao" id="confirmacao" required pattern="EXCLUIR" autocomplete="off"><button class="danger wide">Excluir minha conta</button></form></section></div>{% endblock %}
+{% extends 'base.html' %}
+{% block conteudo %}
+    <div class="page-head">
+        <div>
+            <span class="eyebrow">SEU ESPAÇO</span>
+            <h1>Minha conta</h1>
+            <p>Gerencie os seus dados de acesso à ROTTA.</p>
+        </div>
+    </div>
+    <div class="grid">
+        <section class="card">
+            <h2>Dados do cadastro</h2>
+            <form method="post">
+                <input type="hidden" name="csrf" value="{{ session.csrf }}">
+                <label for="nome">Nome</label>
+                <input name="nome" id="nome" value="{{ usuario.nm_usuario }}" maxlength="100" required>
+                <label for="email">E-mail</label>
+                <input id="email" value="{{ usuario.email }}" readonly>
+                <label for="senha">Nova senha <small>(opcional)</small></label>
+                <input id="senha" name="senha" type="text" minlength="4" maxlength="128" autocomplete="off">
+                <small>Deixe vazio para manter a atual. A nova senha fica visível.</small>
+                <button class="primary wide">Salvar alterações</button>
+            </form>
+        </section>
+        <section class="card">
+            <span class="eyebrow">ENCERRAR SUA JORNADA</span>
+            <h2>Excluir minha conta</h2>
+            <p>Isso remove sua conta, saldo, atividades, histórico e resgates. Não pode ser desfeito.</p>
+            <form method="post" action="{{ url_for('excluir') }}">
+                <input type="hidden" name="csrf" value="{{ session.csrf }}">
+                <label for="confirmacao">Digite EXCLUIR para confirmar</label>
+                <input name="confirmacao" id="confirmacao" required pattern="EXCLUIR" autocomplete="off">
+                <button class="danger wide">Excluir minha conta</button>
+            </form>
+        </section>
+    </div>
+{% endblock %}
