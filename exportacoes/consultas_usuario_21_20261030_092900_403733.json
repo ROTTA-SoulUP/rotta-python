@@ -1,0 +1,36 @@
+{
+    "usuario": {
+        "id_usuario": 21,
+        "nm_usuario": "Guilherme",
+        "email": "guidev1@gmail.com",
+        "dt_cadastro": "2026-10-30T09:27:54.391309"
+    },
+    "saldo_pontos": 0,
+    "atividades": [],
+    "movimentacoes": [],
+    "resgates": [],
+    "operacoes_da_sessao": [
+        {
+            "operacao": "create",
+            "data_hora": "2026-10-30T09:27:54",
+            "dados": {
+                "id_usuario": 21
+            }
+        },
+        {
+            "operacao": "consulta_api_clima",
+            "dados": {
+                "cidade": "Vitória",
+                "estado": "Espírito Santo",
+                "horario_local": "2026-10-30T09:15",
+                "fuso": "America/Sao_Paulo",
+                "temperatura_c": 27.2,
+                "precipitacao_mm": 0.1,
+                "vento_kmh": 14.9,
+                "dica": "Há precipitação estimada. Considere o transporte público para o trajeto.",
+                "fonte": "Open-Meteo",
+                "url_fonte": "https://open-meteo.com/"
+            }
+        }
+    ]
+}
