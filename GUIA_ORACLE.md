@@ -46,7 +46,7 @@ Os JSON antigos ficam preservados, mas não são utilizados nem migrados automat
 - Passagem: 100 pontos; QR Code: 150; cartão: 100. São parâmetros acadêmicos, sem equivalência financeira real. O custo de cartão é uma regra demonstrativa desta integração.
 - O usuário digita o que fez e escolhe aprovação ou rejeição na simulação. O resultado é gravado com método SIMULADA. Não há análise real por IA, upload de mídia ou proteção contra repetição da mesma comprovação.
 - QR Codes contêm códigos DEMO únicos, sem validade em catracas. Resgates não enviam dinheiro nem créditos a operadoras.
-- A Capi permanece sem integração. A API pública exigida na Sprint 4 e a análise real de mídias ainda precisam ser desenvolvidas.
+- A Capi permanece sem integração. A API pública de clima está integrada; a análise real de mídias ainda precisa ser desenvolvida.
 - O aplicativo é executado no terminal. Não é um sistema web nem uma entrega completa de todos os itens da Sprint 4.
 
 ## Roteiro para conferir na sua conexão
@@ -59,3 +59,16 @@ Oito testes automatizados locais passaram: autenticação/edição, e-mail dupli
 
 ## Alteração de senha para banco já criado
 Execute somente ROTTA_AJUSTAR_SENHA.sql com F5, depois reinicie o Python. Não execute novamente o script de criação. Consulte SELECT ID_USUARIO, NM_USUARIO, EMAIL, SENHA FROM TB_USUARIO; para ver as senhas. A senha da conexão Oracle continua oculta.
+
+## API pública — clima para o deslocamento
+
+Após o login, escolha 5 — Clima para o deslocamento. Digite uma cidade brasileira e selecione a cidade/estado na lista. A ROTTA consulta a Open-Meteo por HTTPS e mostra temperatura em °C, precipitação em mm, vento em km/h, horário local e fonte dos dados. A sugestão de transporte é uma regra simples baseada na precipitação retornada, não uma análise por IA nem garantia de segurança do trajeto.
+
+A função ajuda a planejar deslocamentos sustentáveis: caminhada, bicicleta ou transporte público. Não credita pontos, não comprova ações e não altera o Oracle. O programa envia à API somente o nome da cidade e, na consulta meteorológica, coordenadas públicas e parâmetros do clima. Não envia cadastro nem senha.
+
+A consulta bem-sucedida fica nas operações da sessão da conta atual. Escolha 9 para exportá-la em JSON junto dos dados do usuário. Se encerrar o programa antes da exportação, a consulta de clima não é preservada. Sem internet ou com dados incompletos, o programa informa a falha e retorna ao menu; não inventa dados. Cada requisição possui timeout de 10 segundos.
+
+Usa apenas a biblioteca padrão Python (urllib e json), sem dependência ou chave adicional para este uso acadêmico não comercial. Fonte e documentação: https://open-meteo.com/en/docs e https://open-meteo.com/en/docs/geocoding-api. Para uso comercial, conferir as condições do serviço.
+
+### Como demonstrar no vídeo
+Abra a opção 5, procure a cidade e explique as duas requisições GET: busca das coordenadas e consulta meteorológica. Mostre o resultado, a dica baseada na precipitação e o tratamento de erros. Exporte pela opção 9 e mostre a entrada consulta_api_clima no JSON. Explique que os valores vêm da API e não são fixos no código.

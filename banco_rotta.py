@@ -102,12 +102,12 @@ def autenticar(conexao, email, senha):
     """Retorna os dados públicos da conta autenticada ou None."""
     linhas = consultar(conexao, 'SELECT ID_USUARIO, NM_USUARIO, EMAIL, SENHA, SENHA_HASH FROM TB_USUARIO WHERE EMAIL=:email', {'email': email.strip().lower()})
     if linhas and ((linhas[0]['senha'] is not None and senha == linhas[0]['senha']) or
-                   (linhas[0]['senha'] is None and verificar_senha(senha, linhas[0]['senha_hash']))):
+                    (linhas[0]['senha'] is None and verificar_senha(senha, linhas[0]['senha_hash']))):
         usuario = linhas[0]
         if usuario['senha'] is None:
             with transacao(conexao) as c:
                 c.execute('UPDATE TB_USUARIO SET SENHA=:senha, SENHA_HASH=NULL WHERE ID_USUARIO=:p_usuario_id',
-                          {'senha': senha, 'p_usuario_id': usuario['id_usuario']})
+                            {'senha': senha, 'p_usuario_id': usuario['id_usuario']})
         del usuario['senha']
         del usuario['senha_hash']
         return usuario

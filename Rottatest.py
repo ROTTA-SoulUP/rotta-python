@@ -16,6 +16,7 @@ from decimal import Decimal
 from getpass import getpass
 from pathlib import Path
 import banco_rotta as banco
+import api_clima
 
 PASTA = Path(__file__).resolve().parent
 
@@ -216,7 +217,7 @@ def chatbot():
 def menu_usuario(conexao, usuario, registros):
     """Encaminha sempre o ID autenticado às operações do banco."""
     while True:
-        print('\nROTTA\n1 - Pontos e recompensas\n2 - Minha conta\n3 - Consultar meu cadastro\n4 - Capi\n9 - Exportar minhas consultas para JSON\n0 - Sair da conta')
+        print('\nROTTA\n1 - Pontos e recompensas\n2 - Minha conta\n3 - Consultar meu cadastro\n4 - Capi\n5 - Clima para o deslocamento (API)\n9 - Exportar minhas consultas para JSON\n0 - Sair da conta')
         match input('Opção: ').strip():
             case '1': menu_pontos_recompensas(conexao, usuario)
             case '2':
@@ -224,6 +225,7 @@ def menu_usuario(conexao, usuario, registros):
                     return
             case '3': executar_acao(conexao, consultar_usuario, conexao, usuario, registros)
             case '4': chatbot()
+            case '5': executar_acao(conexao, api_clima.menu_clima, registros)
             case '9': executar_acao(conexao, exportar_consultas_crud, conexao, usuario, registros)
             case '0': return
             case _: print('Opção inválida.')
